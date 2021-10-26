@@ -1,0 +1,19 @@
+# build artifacts
+dist
+
+# python artifacts
+__pycache__
+*.egg-info
+.pytest
+.pytest_cache
+
+# virtual environment artifacts
+.venv
+.venvs
+.python-version
+
+# MacOS artifacts
+.DS_Store
+
+# IDE artifacts
+.vscode
