@@ -1,0 +1,56 @@
+name: Build, Test, and Deploy.
+on: [push]
+
+env:
+  PIP_INSTALL_DIR: /home/runner/work/datascience-bot/submission-moderator/output
+  LAMBDA_PACKAGE_FILENAME: lambda_package
+  LAMBDA_PACKAGE_FILEPATH: /home/runner/work/datascience-bot/submission-moderator/output/lambda_package.zip
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install poetry
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: 1.1.11
+      - name: Install dependencies
+        run: poetry install
+      - name: Test app
+        run: poetry run pytest
+      - name: Generate lambda package
+        run: |
+          poetry build --format wheel
+          wheel_filepath=$(find dist -name "*.whl")
+          poetry run pip install $wheel_filepath -t ${{ env.PIP_INSTALL_DIR }}
+          cd ${{ env.PIP_INSTALL_DIR }} && zip ${{ env.LAMBDA_PACKAGE_FILENAME }} * -r
+      - name: Archive lambda package
+        uses: actions/upload-artifact@master
+        with:
+          name: lambda_package
+          path: ${{ env.LAMBDA_PACKAGE_FILEPATH }}
+  deploy:
+    # if: github.ref == 'refs/heads/main'
+    needs: build_and_test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Download lambda package
+        uses: actions/download-artifact@master
+        with:
+          name: lambda_package
+          path: ${{ env.LAMBDA_PACKAGE_FILEPATH }}
+      - name: Install awscli
+        run: pip install --user awscli
+      # - name: Deploy lambda package
+      #   run: aws lambda update-functon-code ...
+      #   env:
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     AWS_REGION: ${{ secrets.AWS_REGION }}
