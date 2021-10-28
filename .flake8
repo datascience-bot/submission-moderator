@@ -1,0 +1,31 @@
+[flake8]
+# Line length is set to 88, because it is the default line length of the Black formatter
+max-line-length = 88
+
+# Ignore the following errors because they conflict with Black:
+# E203: Whitespace before ':'
+# W503: Line break occurred before a binary operator
+# D202: No blank lines allowed after function docstring
+#
+# Ignore the following because I don't like them:
+# D107: Missing docstring in __init__
+# D203: 1 blank line required before class docstring
+# D213: Multi-line docstring summary should start at the second line
+# D402: First line should not be the function's signature
+# D413: Missing blank line after last section
+# D415: First line should end with a period, question mark, or exclamation point
+# D416: Section name should end with a colon
+# D417: Missing argument descriptions in the docstring
+# D401: First line should be in imperative mood
+
+docstring-convention = all
+extend-ignore = E203, W503, D202, D107, D203, D213, D401, D402, D413, D415, D416, D417
+
+# We do not require docstrings for Test classes (D101), and test methods (D102) or functions (D103).
+# Test names should be self-explaining.
+per-file-ignores = test*.py:D101,D102,D103
+
+# The exclude option in .flake8 is ignored by pre-commit and have to be specified in the
+# .pre-commit-config.yaml as well.
+# This is a bug in pre-commit: https://github.com/pre-commit/pre-commit-hooks/issues/112
+exclude = .git, .venv, .vscode
